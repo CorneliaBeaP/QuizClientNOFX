@@ -5,12 +5,14 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+
 
 import static quiz.SwingSetup.*;
 
@@ -83,7 +85,7 @@ public class Gui extends JFrame implements ActionListener {
 
         categoryButtons.forEach(button -> {
             categoryButtonsPanel.add(button);
-            button.addActionListener(this);
+            button.addActionListener(this::actionPerformed);
         });
 
         //categoryPanel
@@ -99,55 +101,80 @@ public class Gui extends JFrame implements ActionListener {
         setLocationByPlatform(true);
         setVisible(true);
         setSize(new Dimension(400, 600));
+
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
-            try {
-                for (JButton categoryButton : categoryButtons) {
-                    if (e.getSource() == categoryButton) {
-                        serverHandler.sendCategory(categoryButton.getText());
-                    }
+        try {
+            for (JButton categoryButton : categoryButtons) {
+                if (e.getSource() == categoryButton) {
+                    serverHandler.sendCategory(categoryButton.getText());
                 }
-                for (JButton answerButton : answerButtons) {
-                    if (e.getSource() == answerButton) {
-                        isCorrectAnswer(answerButton);
-                        changeButtonColour((JButton) e.getSource());
-                    }
-                }
-            } catch (Exception ea) {
-                System.out.println(ea.getMessage());
             }
-        }
+            for (JButton answerButton : answerButtons) {
+//                om jag försöker med while nedan så får man samma fråga igen
+                if (e.getSource() == answerButton) {
+                    answerButton.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            try {
+//                                Det här verkar vara det som gör att det faktiskt byts färg
+                                changeButtonColour(answerButton);
 
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+
+                        }
+                    });
+
+
+                    isCorrectAnswer(answerButton);
+
+
+                }
+//                while(answerButton.isSelected()){
+//                    changeButtonColour(answerButton);
+//                }
+            }
+        } catch (Exception ea) {
+            System.out.println(ea.getMessage());
+        }
+    }
 
     private void changeButtonColour(JButton button) throws InterruptedException {
+
         answerButtons.get(0).setBackground(Color.red);
         answerButtons.get(1).setBackground(Color.red);
         answerButtons.get(2).setBackground(Color.red);
         answerButtons.get(3).setBackground(Color.green);
         button.setBorder(new LineBorder(Color.black));
+//        Verkar vara här jag vill ha sleep?
+        Thread.sleep(10);
+//        Funkar inte såvida jag inte har raden nedan, men denna skapar andra buggar
+//        När rundan tar slut får inte den ena spelaren veta poängen för rundan just nu eller om den vunnit vid ett avslutat spel om man har sleep, men om man inte har sleep så uppdateras inte färgerna varje spel
         cardLayout.show(mainPanel, "game");
-        repaint();
-//        answerButtons.get(0).setBackground(null);
-//        answerButtons.get(1).setBackground(null);
-//        answerButtons.get(2).setBackground(null);
-//        answerButtons.get(3).setBackground(null);
-//        button.setBorder(new LineBorder(Color.WHITE));
-//        cardLayout.show(mainPanel, "game");
-//        repaint();
-
 
     }
 
+
     public void isCorrectAnswer(JButton b) throws InterruptedException {
+
         if (b.getText().equals(currentQuestion.getAnswerCorrect())) {
             serverHandler.writeStringToServer("correct");
+//            Thread.sleep(500);
+//cardLayout.show(mainPanel, "info");
+//            JOptionPane.showMessageDialog(null, "Korrekt!");
+
 
         } else {
+//            Thread.sleep(500);
             serverHandler.writeStringToServer("wrong");
+//            JOptionPane.showMessageDialog(null, "Ej korrekt!");
 
+//            cardLayout.show(mainPanel, "info");
         }
     }
 
@@ -179,14 +206,14 @@ public class Gui extends JFrame implements ActionListener {
     }
 
     public void clearButtonChanges() {
-answerButtons.get(0).setBackground(null);
-answerButtons.get(1).setBackground(null);
-answerButtons.get(2).setBackground(null);
-answerButtons.get(3).setBackground(null);
-answerButtons.get(0).setBorder(new LineBorder(Color.WHITE));
-answerButtons.get(1).setBorder(new LineBorder(Color.WHITE));
-answerButtons.get(2).setBorder(new LineBorder(Color.WHITE));
-answerButtons.get(3).setBorder(new LineBorder(Color.WHITE));
+        answerButtons.get(0).setBackground(null);
+        answerButtons.get(1).setBackground(null);
+        answerButtons.get(2).setBackground(null);
+        answerButtons.get(3).setBackground(null);
+        answerButtons.get(0).setBorder(new LineBorder(Color.WHITE));
+        answerButtons.get(1).setBorder(new LineBorder(Color.WHITE));
+        answerButtons.get(2).setBorder(new LineBorder(Color.WHITE));
+        answerButtons.get(3).setBorder(new LineBorder(Color.WHITE));
 
     }
 }
