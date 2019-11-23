@@ -11,8 +11,8 @@ import java.io.IOException;
 
 public class SwingSetup {
 
-    public static JButton createButton(String text) {
-        JButton button = new JButton(text);
+    public static JButton createButton() {
+        JButton button = new JButton("answer");
         button.setForeground(Color.WHITE);
         Border line = new LineBorder(Color.WHITE);
         Border margin = new EmptyBorder(5, 15, 5, 15);

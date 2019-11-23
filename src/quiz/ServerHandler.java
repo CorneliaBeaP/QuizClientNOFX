@@ -17,7 +17,7 @@ public class ServerHandler implements Runnable{
     @Override
     public void run() {
 
-        try(Socket socket = new Socket("localhost",5989)) {
+        try(Socket socket = new Socket("localhost",5929)) {
 
             writer = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream serverReader = new ObjectInputStream(socket.getInputStream());
@@ -30,6 +30,7 @@ public class ServerHandler implements Runnable{
             while ((serverInput = serverReader.readObject()) != null) {
 
                 if (serverInput instanceof Question) {
+                    gui.clearButtonChanges();
                     Question question = (Question) serverInput;
                     gui.updateQuestion(question);
                     System.out.println(question.getQuestionText());
@@ -44,6 +45,7 @@ public class ServerHandler implements Runnable{
 //                    }
                 } else if (serverInput instanceof String) {
                     gui.setInfoPanel(serverInput.toString());
+
                     System.out.println(serverInput);
 
             } else if (serverInput instanceof List<?>) {
